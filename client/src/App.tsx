@@ -348,10 +348,16 @@ function App() {
                       </div>
                       {timeLeft !== null && (
                         <div className="space-y-2">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Next round starts in:
+                          </div>
                           <div className="text-2xl font-bold text-blue-600">
                             {formatTime(timeLeft)}
                           </div>
-                          <Progress value={(10 - timeLeft) * 10} className="w-full" />
+                          <Progress value={((60 - timeLeft) / 60) * 100} className="w-full" />
+                          <div className="text-xs text-gray-400">
+                            New rounds start automatically every 60 seconds
+                          </div>
                         </div>
                       )}
                     </div>

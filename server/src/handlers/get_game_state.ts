@@ -4,7 +4,7 @@ import { playersTable, gameRoundsTable } from '../db/schema';
 import { type GameState } from '../schema';
 import { eq, desc, isNull, isNotNull } from 'drizzle-orm';
 
-export async function getGameState(): Promise<GameState> {
+export async function getGameState(getTimeUntilNextRound?: () => number | null): Promise<GameState> {
   try {
     // Get current active round
     const activeRounds = await db.select()
@@ -52,9 +52,14 @@ export async function getGameState(): Promise<GameState> {
       winner_name: result.winner_name
     }));
 
+    // Calculate time until next round
+    const timeUntilNextRound = currentRound 
+      ? null // If there's an active round, no countdown
+      : getTimeUntilNextRound ? getTimeUntilNextRound() : null;
+
     return {
       current_round: currentRound,
-      time_until_next_round: null, // Not implemented in this basic version
+      time_until_next_round: timeUntilNextRound,
       leaderboard,
       recent_rounds: formattedRecentRounds
     };
