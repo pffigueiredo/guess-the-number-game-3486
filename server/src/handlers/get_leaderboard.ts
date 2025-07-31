@@ -1,10 +1,19 @@
 
+import { db } from '../db';
+import { playersTable } from '../db/schema';
 import { type Player } from '../schema';
+import { desc } from 'drizzle-orm';
 
 export async function getLeaderboard(): Promise<Player[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching the leaderboard:
-    // - Get all players ordered by total_wins DESC, current_streak DESC
-    // - Return top players for display
-    return Promise.resolve([] as Player[]);
+  try {
+    const results = await db.select()
+      .from(playersTable)
+      .orderBy(desc(playersTable.total_wins), desc(playersTable.current_streak))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch leaderboard:', error);
+    throw error;
+  }
 }

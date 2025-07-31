@@ -1,20 +1,37 @@
 
+import { db } from '../db';
+import { gameRoundsTable } from '../db/schema';
 import { type GameRound } from '../schema';
+import { eq } from 'drizzle-orm';
 
-export async function startNewRound(): Promise<GameRound> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is starting a new game round:
-    // - End any currently active round
-    // - Generate random number between 1-100
-    // - Create new round record in database
-    // - Return the new round information
-    return Promise.resolve({
-        id: 1,
-        target_number: Math.floor(Math.random() * 100) + 1,
+export const startNewRound = async (): Promise<GameRound> => {
+  try {
+    // End any currently active rounds
+    await db.update(gameRoundsTable)
+      .set({
+        is_active: false,
+        ended_at: new Date()
+      })
+      .where(eq(gameRoundsTable.is_active, true))
+      .execute();
+
+    // Generate random target number between 1-100
+    const targetNumber = Math.floor(Math.random() * 100) + 1;
+
+    // Create new round record
+    const result = await db.insert(gameRoundsTable)
+      .values({
+        target_number: targetNumber,
         winner_id: null,
         total_guesses: 0,
-        started_at: new Date(),
-        ended_at: null,
         is_active: true
-    } as GameRound);
-}
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Failed to start new round:', error);
+    throw error;
+  }
+};
